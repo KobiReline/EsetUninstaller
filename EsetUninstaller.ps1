@@ -1,4 +1,5 @@
 ﻿$tempDir = "C:\Temp\kScriptEsetUninstaller\"
+$preper = "$($tempDir)Redy.txt"
 $networkSettingsFilePath = "$($tempDir)NetworkSettings.txt"
 $uacSettingsFilePath = "$($tempDir)uacSettings.txt"
 $reboot2SafeModeFilePath = "$($tempDir)Reboot2SafeMode.cmd"
@@ -94,13 +95,13 @@ function CreatePing2GoogleFile()
     'cmd /c ping google.com -n 1' | Set-Content -Path $pingFilePath
 }
 function Preper(){
-    if ((Test-Path $tempDir) ) {
+    if ((Test-Path $preper) ) {
         return
     }
 
     New-Item -ItemType Directory -Path $tempDir -Force 
     Get-ExecutionPolicy -List | ConvertTo-Json | Set-Content -Path $executionPolicyFilePath -Force
-    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" > $runCmdFilePath
+    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii
     Save-UACSettings
     Add-LocalAdminUser
     CreateReboot2SafeModeFile
