@@ -110,7 +110,7 @@ function Preper(){
     CreatePing2GoogleFile
     RunPing
     Set-UAC
-    "Ready" > $pingFilePath
+    "Ready" > $preper
 }
 function Get-AdminCredential(){
     $pass = ConvertTo-SecureString $Password -AsPlainText -Force
