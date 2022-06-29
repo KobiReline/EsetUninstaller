@@ -38,7 +38,7 @@ function RebootSafeMode(){
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\AteraAgent" /f
     REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
 
-    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" > $runCmdFilePath | Set-Content -Path $runCmdFilePath -Encoding Ascii
+    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii
 
     RunAsAdmin $reboot2SafeModeFilePath 
 
