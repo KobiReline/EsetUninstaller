@@ -39,9 +39,7 @@ function RebootSafeMode(){
     REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
         "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" > $runCmdFilePath
 
-    #call $reboot2SafeModeFilePath
-    $cred = Get-AdminCredential
-    Start-Process -Credential $cred -Verb Runas -FilePath $reboot2SafeModeFilePath 
+    RunAsAdmin $reboot2SafeModeFilePath 
 
    # bcdedit /set {current} safeboot network
    # shutdown -r -f -t 30
@@ -65,10 +63,13 @@ $s | Set-Content -Path $reboot2SafeModeFilePath -Encoding Ascii
 #"bcdedit /deletevalue {current} safeboot" > $reboot2NormalModeFilePath
 #"shutdown -r -f -t 30" >> $reboot2NormalModeFilePath
 }
-function Reboot2NormalMode(){
+function RunAsAdmin($path){
     #call $reboot2NormalModeFilePath
     $cred = Get-AdminCredential
-    Start-Process -Credential $cred -Verb Runas -FilePath $reboot2NormalModeFilePath 
+    Start-Process -Credential $cred -Verb RunAs -FilePath $path 
+}
+function Reboot2NormalMode(){
+    RunAsAdmin $reboot2NormalModeFilePath 
 }
 function UnInstall(){
 "1" > "$($tempDir)UnInstall.txt"
@@ -114,8 +115,7 @@ function Get-AdminCredential(){
     return New-Object System.Management.Automation.PSCredential ($UserName, $pass)
 }
 function RunPing(){
-    $cred = Get-AdminCredential
-    Start-Process -Credential $cred -Verb Runas -FilePath $pingFilePath # -Credential $cred
+    RunAsAdmin $pingFilePath 
 }
  #REG ADD "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run" /f
 
