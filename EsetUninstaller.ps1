@@ -107,6 +107,7 @@ function Preper(){
     Save-UACSettings
     Add-LocalAdminUser
     CreateReboot2SafeModeFile
+    CreateReboot2NormalModeFile
     CreatePing2GoogleFile
     RunPing
     Set-UAC
@@ -199,7 +200,6 @@ function Main(){
         Write-Host "Stage 1"
         SaveNetworkSettings
         Download
-        CreateReboot2NormalModeFile
         "1">"$($tempDir)1.txt"
         ($stage + 1)  > "$($stageFilePath)"
         RebootSafeMode
