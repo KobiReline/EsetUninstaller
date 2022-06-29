@@ -38,7 +38,6 @@ function RebootSafeMode(){
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\AteraAgent" /f
     REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
 
-    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii
 
     RunAsAdmin $reboot2SafeModeFilePath 
 
@@ -103,7 +102,7 @@ function Preper(){
 
     New-Item -ItemType Directory -Path $tempDir -Force 
     Get-ExecutionPolicy -List | ConvertTo-Json | Set-Content -Path $executionPolicyFilePath -Force
-    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii
+    "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii #Create run cmd file
     Save-UACSettings
     Add-LocalAdminUser
     CreateReboot2SafeModeFile
@@ -111,6 +110,7 @@ function Preper(){
     CreatePing2GoogleFile
     RunPing
     Set-UAC
+    "Ready" > $pingFilePath
 }
 function Get-AdminCredential(){
     $pass = ConvertTo-SecureString $Password -AsPlainText -Force
@@ -119,7 +119,6 @@ function Get-AdminCredential(){
 function RunPing(){
     RunAsAdmin $pingFilePath 
 }
- #REG ADD "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run" /f
 
 function Add-LocalAdminUser(){
     $secureStringPassword = $Password | ConvertTo-SecureString -AsPlainText -Force
@@ -207,6 +206,7 @@ function Main(){
     if ($stage -eq 2){
         Write-Host "Stage 2"
         UnInstall
+        Start-Sleep 90
         #ResotreNetworkSettings
         Reboot2NormalMode
         "2">"$($tempDir)2.txt"
