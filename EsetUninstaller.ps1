@@ -10,6 +10,7 @@ $pingFilePath = "$($tempDir)Ping.cmd"
 $esetUninstallerDownloadUrl = "https://download.eset.com/com/eset/tools/installers/eset_apps_remover/latest/esetuninstaller.exe"
 $anyDeskDownloadUrl = "https://download.eset.com/com/eset/tools/installers/eset_apps_remover/latest/esetuninstaller.exe"
 $esetUninstallerFilePath = "$($tempDir)esetuninstaller.exe"
+$esetUninstallerCmdFilePath = "$($tempDir)Uninstall.cmd"
 $anyDeskFilePath = "$($tempDir)AnyDesk.exe"
 $executionPolicyFilePath = "$($tempDir)executionPolicy.txt"
 $stageFilePath = "$($tempDir)stage.txt"
@@ -36,7 +37,7 @@ function RebootSafeMode(){
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\Splashtop Inc." /f
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\SplashtopRemoteService" /f
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\AteraAgent" /f
-    REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
+    #REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
 
 
     RunAsAdmin $reboot2SafeModeFilePath 
@@ -44,7 +45,6 @@ function RebootSafeMode(){
    # bcdedit /set {current} safeboot network
    # shutdown -r -f -t 30
 }
-
 function CreateReboot2NormalModeFile(){
 $s = "bcdedit /deletevalue {current} safeboot"
 $s += [System.Environment]::NewLine + "shutdown -r -f -t 30"
@@ -104,6 +104,7 @@ function Preper(){
     New-Item -ItemType Directory -Path $tempDir -Force 
     Get-ExecutionPolicy -List | ConvertTo-Json | Set-Content -Path $executionPolicyFilePath -Force
     "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii #Create run cmd file
+    "$($esetUninstallerFilePath) /fix-filter-list /mode=online /force /reboot /reinst"| Set-Content -Path $esetUninstallerCmdFilePath -Encoding Ascii
     Save-UACSettings
     Add-LocalAdminUser
     CreateReboot2SafeModeFile
@@ -111,6 +112,8 @@ function Preper(){
     CreatePing2GoogleFile
     RunPing
     Set-UAC
+    SaveNetworkSettings
+    Download
     "Ready" > $preper
 }
 function Get-AdminCredential(){
@@ -198,27 +201,14 @@ function Main(){
 
     if ($stage -eq 1){
         Write-Host "Stage 1"
-        SaveNetworkSettings
-        Download
-        "1">"$($tempDir)1.txt"
         ($stage + 1)  > "$($stageFilePath)"
         RebootSafeMode
     }
     if ($stage -eq 2){
-        Write-Host "Stage 2"
-        UnInstall
-        Start-Sleep 90
         #ResotreNetworkSettings
-        Reboot2NormalMode
-        "2">"$($tempDir)2.txt"
-        ($stage + 1)  > "$($stageFilePath)"
-    }
-    if ($stage -eq 3){
         Restore-UACSettings
-        Write-Host "Stage 3"
-        "3">"$($tempDir)3.txt"
+        Write-Host "Stage 2"
         ($stage + 1)  > "$($stageFilePath)"
-        Start-Sleep 5
         Cleanup
     }
 }
