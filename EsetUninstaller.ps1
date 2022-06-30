@@ -64,9 +64,10 @@ $s | Set-Content -Path $reboot2SafeModeFilePath -Encoding Ascii
 #"shutdown -r -f -t 30" >> $reboot2NormalModeFilePath
 }
 function RunAsAdmin($path){
-    #call $reboot2NormalModeFilePath
-    $cred = Get-AdminCredential
-    Start-Process  -Credential $cred -FilePath $path 
+    ##call $reboot2NormalModeFilePath
+    #$cred = Get-AdminCredential
+    #Start-Process  -Credential $cred -FilePath $path 
+    & $path
 }
 function Reboot2NormalMode(){
     RunAsAdmin $reboot2NormalModeFilePath 
