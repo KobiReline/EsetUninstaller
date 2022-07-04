@@ -244,13 +244,14 @@ function Main(){
         UnInstall
     }
     if ($stage -eq 3){
-        Write-Host "Set script run after reboot and Reboot to Safe Mode"
+        Write-Host "Set script run after reboot and Reboot to Normal Mode"
         #REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell" /t REG_SZ /d "explorer.exe" /f
          REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit" /t REG_SZ /d "C:\Windows\system32\userinit.exe," /f
+         Reboot2NormalMode
         ($stage + 1)  > "$($stageFilePath)"
     }
     if ($stage -eq 4){
-        Write-Host "Call to Eset uninstaller program."
+        Write-Host "Cleanup"
         #ResotreNetworkSettings
         Restore-UACSettings
 
