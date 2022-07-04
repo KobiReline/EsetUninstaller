@@ -113,8 +113,8 @@ function Cleanup(){
         Set-ExecutionPolicy -ExecutionPolicy $executionPolicy -Scope $scope -Force -ErrorAction SilentlyContinue 
     }
     Remove-LocalUser -Name $UserName
-    Remove-AutoAdminLogon
     REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /f
+    Remove-AutoAdminLogon
     Start-Sleep 5
     #Remove-Item -LiteralPath $tempDir  -Force -Recurse
 }
@@ -249,6 +249,7 @@ function Main(){
          REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit" /t REG_SZ /d "C:\Windows\system32\userinit.exe," /f
          Reboot2NormalMode
         ($stage + 1)  > "$($stageFilePath)"
+        [int]$stage = ($stage + 1) 
     }
     if ($stage -eq 4){
         Write-Host "Cleanup"
