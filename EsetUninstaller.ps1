@@ -232,7 +232,7 @@ function Main(){
     [int]$stage = Get-Content -Path $stageFilePath
     Write-Host "Stage $($stage)"
     if ($stage -eq 1){
-        Write-Host "Set script run after reboot and Reboot to Safe Mode"
+        Write-Host "Set script run to after reboot and Reboot to Safe Mode"
         ($stage + 1)  > "$($stageFilePath)"
         REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit" /t REG_SZ /d "C:\Windows\system32\userinit.exe,C:\Temp\kScriptEsetUninstaller\Run.cmd" /f
         RebootSafeMode
@@ -244,7 +244,7 @@ function Main(){
         UnInstall
     }
     if ($stage -eq 3){
-        Write-Host "Set script run after reboot and Reboot to Normal Mode"
+        Write-Host "Set script to run after reboot and Reboot to Normal Mode"
         #REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell" /t REG_SZ /d "explorer.exe" /f
          REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit" /t REG_SZ /d "C:\Windows\system32\userinit.exe," /f
          Reboot2NormalMode
