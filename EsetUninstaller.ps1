@@ -8,7 +8,7 @@ $runCmdFilePath = "$($tempDir)Run.cmd"
 $scriptFilePath = "$($tempDir)EsetUninstaller.ps1"
 $pingFilePath = "$($tempDir)Ping.cmd"
 $esetUninstallerDownloadUrl = "https://download.eset.com/com/eset/tools/installers/eset_apps_remover/latest/esetuninstaller.exe"
-$anyDeskDownloadUrl = "https://download.eset.com/com/eset/tools/installers/eset_apps_remover/latest/esetuninstaller.exe"
+$anyDeskDownloadUrl = "https://download.anydesk.com/AnyDesk.exe"
 $esetUninstallerFilePath = "$($tempDir)esetuninstaller.exe"
 $esetUninstallerCmdFilePath = "$($tempDir)Uninstall.cmd"
 $anyDeskFilePath = "$($tempDir)AnyDesk.exe"
@@ -37,7 +37,7 @@ function RebootSafeMode(){
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\Splashtop Inc." /f
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\SplashtopRemoteService" /f
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\AteraAgent" /f
-    REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
+    #REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
    
 
     RunAsAdmin $reboot2SafeModeFilePath 
@@ -49,6 +49,18 @@ function CreateReboot2NormalModeFile(){
 $s = "bcdedit /deletevalue {current} safeboot"
 $s += [System.Environment]::NewLine + "shutdown -r -f -t 30"
 $s | Set-Content -Path $reboot2NormalModeFilePath -Encoding Ascii
+
+#"bcdedit /deletevalue {current} safeboot" > $reboot2NormalModeFilePath
+#"shutdown -r -f -t 30" >> $reboot2NormalModeFilePath
+}
+function CreateUninstallCmdFile(){
+"1" > "$($tempDir)UnInstall.txt"
+$s = "cmd /c echo Befor %time% >> $($tempDir)uninstall.log"
+$s += [System.Environment]::NewLine + "timeout 30 >> $($tempDir)uninstall.log"
+$s += [System.Environment]::NewLine + "$($esetUninstallerFilePath) /fix-filter-list /mode=online /force /reboot /reinst"
+$s += [System.Environment]::NewLine + "cmd /c echo After %time% >> $($tempDir)uninstall.log"
+
+$s | Set-Content -Path $esetUninstallerCmdFilePath -Encoding Ascii
 
 #"bcdedit /deletevalue {current} safeboot" > $reboot2NormalModeFilePath
 #"shutdown -r -f -t 30" >> $reboot2NormalModeFilePath
@@ -75,6 +87,7 @@ function Remove-AutoAdminLogon(){
     REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /f
     REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "AutoAdminLogon" /t REG_SZ /d "0" /f
 }
+   
 
 function RunAsAdmin($path){
     ##call $reboot2NormalModeFilePath
@@ -86,7 +99,7 @@ function Reboot2NormalMode(){
     RunAsAdmin $reboot2NormalModeFilePath 
 }
 function UnInstall(){
-"1" > "$($tempDir)UnInstall.txt"
+    RunAsAdmin $esetUninstallerCmdFilePath
 }
 function Cleanup(){
     
@@ -102,7 +115,7 @@ function Cleanup(){
     }
     Remove-LocalUser -Name $UserName
     Remove-AutoAdminLogon
-    REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /f
+    #REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /f
     Start-Sleep 5
     Remove-Item -LiteralPath $tempDir  -Force -Recurse
 }
@@ -119,8 +132,9 @@ function Preper(){
     New-Item -ItemType Directory -Path $tempDir -Force 
     Get-ExecutionPolicy -List | ConvertTo-Json | Set-Content -Path $executionPolicyFilePath -Force
     "PowerShell -ExecutionPolicy Unrestricted -File $($scriptFilePath)" | Set-Content -Path $runCmdFilePath -Encoding Ascii #Create run cmd file
-    "$($esetUninstallerFilePath) /fix-filter-list /mode=online /force /reboot /reinst"| Set-Content -Path $esetUninstallerCmdFilePath -Encoding Ascii
-    REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell" /t REG_SZ /d "explorer.exe,$($runCmdFilePath)" /f
+    #"$($esetUninstallerFilePath) /fix-filter-list /mode=online /force /reboot /reinst"| Set-Content -Path $esetUninstallerCmdFilePath -Encoding Ascii
+    #REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell" /t REG_SZ /d "explorer.exe,$($runCmdFilePath)" /f
+    CreateUninstallCmdFile
     Save-UACSettings
     Add-LocalAdminUser
     CreateReboot2SafeModeFile
@@ -219,15 +233,18 @@ function Main(){
     if ($stage -eq 1){
         Write-Host "Stage 1"
         ($stage + 1)  > "$($stageFilePath)"
+        REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit" /t REG_SZ /d "C:\Windows\system32\userinit.exe,C:\Temp\kScriptEsetUninstaller\Run.cmd" /f
         RebootSafeMode
     }
     if ($stage -eq 2){
         Write-Host "Stage 2"
         ($stage + 1)  > "$($stageFilePath)"
+        UnInstall
     }
     if ($stage -eq 3){
         Write-Host "Stage 3"
-        REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell" /t REG_SZ /d "explorer.exe" /f
+        #REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell" /t REG_SZ /d "explorer.exe" /f
+         REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit" /t REG_SZ /d "C:\Windows\system32\userinit.exe," /f
         ($stage + 1)  > "$($stageFilePath)"
     }
     if ($stage -eq 4){
