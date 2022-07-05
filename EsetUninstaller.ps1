@@ -116,7 +116,7 @@ function Cleanup(){
     REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "Run.cmd" /f
     Remove-AutoAdminLogon
     Start-Sleep 5
-    #Remove-Item -LiteralPath $tempDir  -Force -Recurse
+    Remove-Item -LiteralPath $tempDir  -Force -Recurse
 }
 
 #function CreatePing2GoogleFile()
