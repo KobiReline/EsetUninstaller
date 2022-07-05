@@ -37,7 +37,7 @@ function RebootSafeMode(){
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\Splashtop Inc." /f
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\SplashtopRemoteService" /f
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\AteraAgent" /f
-    REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
+    REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "Run.cmd" /t REG_SZ /d "$($runCmdFilePath)" /f
    
 
     RunAsAdmin $reboot2SafeModeFilePath 
@@ -113,7 +113,7 @@ function Cleanup(){
         Set-ExecutionPolicy -ExecutionPolicy $executionPolicy -Scope $scope -Force -ErrorAction SilentlyContinue 
     }
     Remove-LocalUser -Name $UserName
-    REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "*Run.cmd" /f
+    REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "Run.cmd" /f
     Remove-AutoAdminLogon
     Start-Sleep 5
     #Remove-Item -LiteralPath $tempDir  -Force -Recurse
