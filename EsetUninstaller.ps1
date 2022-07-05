@@ -55,7 +55,7 @@ $s | Set-Content -Path $reboot2NormalModeFilePath -Encoding Ascii
 }
 function CreateUninstallCmdFile(){
 $s = "cmd /c echo Befor %time% >> $($tempDir)uninstall.log"
-$s += [System.Environment]::NewLine + "$($esetUninstallerFilePath) /fix-filter-list /mode=online /force /reboot /reinst"
+$s += [System.Environment]::NewLine + "$($esetUninstallerFilePath) /mode=online /force /reboot /reinst"
 $s += [System.Environment]::NewLine + "cmd /c echo After %time% >> $($tempDir)uninstall.log"
 $s += [System.Environment]::NewLine + "shutdown -r -f -t 30"
 
