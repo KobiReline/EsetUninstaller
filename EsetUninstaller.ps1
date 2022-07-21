@@ -257,7 +257,7 @@ function Main(){
         Restore-UACSettings
 
         ($stage + 1)  > "$($stageFilePath)"
-        #Cleanup
+        Cleanup
     }
 }
 main > $null
