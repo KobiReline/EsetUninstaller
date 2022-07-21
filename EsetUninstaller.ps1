@@ -47,7 +47,7 @@ function RebootSafeMode(){
 }
 function CreateReboot2NormalModeFile(){
 $s = "bcdedit /deletevalue {current} safeboot"
-$s += [System.Environment]::NewLine + "shutdown -r -f -t 30"
+$s += [System.Environment]::NewLine + "shutdown -r -f -t 1"
 $s | Set-Content -Path $reboot2NormalModeFilePath -Encoding Ascii
 
 #"bcdedit /deletevalue {current} safeboot" > $reboot2NormalModeFilePath
@@ -57,22 +57,22 @@ function CreateUninstallCmdFile(){
 $s = "cmd /c echo Befor %time% >> $($tempDir)uninstall.log"
 $s += [System.Environment]::NewLine + "$($esetUninstallerFilePath) /mode=online /force /reboot /reinst"
 $s += [System.Environment]::NewLine + "cmd /c echo After %time% >> $($tempDir)uninstall.log"
-$s += [System.Environment]::NewLine + "shutdown -r -f -t 30"
+$s += [System.Environment]::NewLine + "shutdown -r -f -t 1"
 
 $s | Set-Content -Path $esetUninstallerCmdFilePath -Encoding Ascii
 
 #"bcdedit /deletevalue {current} safeboot" > $reboot2NormalModeFilePath
-#"shutdown -r -f -t 30" >> $reboot2NormalModeFilePath
+#"shutdown -r -f -t 1" >> $reboot2NormalModeFilePath
 }
 function CreateReboot2SafeModeFile(){
 
 $s = "bcdedit /set {current} safeboot network"
-$s += [System.Environment]::NewLine + "shutdown -r -f -t 30"
+$s += [System.Environment]::NewLine + "shutdown -r -f -t 1"
 
 $s | Set-Content -Path $reboot2SafeModeFilePath -Encoding Ascii
 
 #"bcdedit /deletevalue {current} safeboot" > $reboot2NormalModeFilePath
-#"shutdown -r -f -t 30" >> $reboot2NormalModeFilePath
+#"shutdown -r -f -t 1" >> $reboot2NormalModeFilePath
 }
 
 
@@ -112,11 +112,11 @@ function Cleanup(){
         [Microsoft.PowerShell.ExecutionPolicyScope]$scope = [Microsoft.PowerShell.ExecutionPolicyScope]$policy[$i].Scope
         Set-ExecutionPolicy -ExecutionPolicy $executionPolicy -Scope $scope -Force -ErrorAction SilentlyContinue 
     }
-    Remove-LocalUser -Name $UserName
+    #Remove-LocalUser -Name $UserName
     REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "Run.cmd" /f
     Remove-AutoAdminLogon
-    Start-Sleep 5
-    Remove-Item -LiteralPath $tempDir  -Force -Recurse
+    #Start-Sleep 5
+    #Remove-Item -LiteralPath $tempDir  -Force -Recurse
 }
 
 #function CreatePing2GoogleFile()
@@ -257,7 +257,7 @@ function Main(){
         Restore-UACSettings
 
         ($stage + 1)  > "$($stageFilePath)"
-        Cleanup
+        #Cleanup
     }
 }
 main > $null
